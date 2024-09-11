@@ -177,7 +177,9 @@ def _wer(hyp_folder, dasr_root, c_part, output_folder, text_norm, ignore, metric
         elif metric == "cpWER":
             error_rates = meeteval.wer.cpwer(reference=r, hypothesis=h, uem=uem)
         elif metric == "DER":
-            error_rates = meeteval.der.md_eval_22(reference=r, hypothesis=h, collar=0.25, uem=uem)
+            error_rates = meeteval.der.md_eval_22(
+                reference=r, hypothesis=h, collar=0.25, uem=uem
+            )
         else:
             raise ValueError(metric)
         details[deveval][scenario] = error_rates
