@@ -225,6 +225,3 @@ def _wer(hyp_folder, dasr_root, c_part, output_folder, text_norm, ignore, metric
         output_folder.mkdir(parents=True, exist_ok=True)
         _dump_json(details, str(output_folder / f"{metric}_per_session.json"))
         _dump_json(result, str(output_folder / f"{metric}_per_scenario.json"))
-
-
-
