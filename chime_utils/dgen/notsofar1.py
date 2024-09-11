@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import os
+import subprocess
 from copy import deepcopy
 from pathlib import Path
 
@@ -23,21 +24,60 @@ logger = logging.getLogger(__name__)
 NOTSOFAR1_FS = 16000
 
 
+_check_version_exists_cache = None
+
+
+def check_version_exists(version):
+    global _check_version_exists_cache
+    if _check_version_exists_cache is None:
+        cmd = (
+            "az storage blob list "
+            "--container-name benchmark-datasets "
+            "--account-name notsofarsa "
+            '--prefix "" '
+            '--delimiter "MTG" '
+            '--query "[].name"'
+        )
+        _check_version_exists_cache = subprocess.check_output(cmd, shell=True).decode(
+            "utf-8"
+        )
+
+    if version in _check_version_exists_cache:
+        return True
+    else:
+        raise RuntimeError(
+            f"Version {version} does not exist (anymore) in NOTSOFAR1 dataset !\n"
+            f"Available: (pattern: <subset_name>/<version>/...)"
+            f" {_check_version_exists_cache}"
+        )
+
+
 def download_notsofar1(download_dir, subset_name):
     if subset_name == "dev":
         subset_name = "dev_set"
-        version = "240415.2_dev_with_GT"
-    elif subset_name == "train":
+        version = "240825.1_dev1"
+    elif subset_name == "train_legacy":
         subset_name = "train_set"
         version = "240501.1_train"
+    elif subset_name == "train":
+        subset_name = "train_set"
+        version = "240825.1_train"
     elif subset_name == "eval":
         subset_name = "eval_set"
         version = "240629.1_eval_small"
+    elif subset_name == "eval_large":
+        subset_name = "eval_set"
+        version = "240825.1_eval_full_with_GT"
     else:
         raise RuntimeError("Evaluation data has not yet been released !")
-    dev_meetings_dir = download_meeting_subset(
-        subset_name=subset_name, version=version, destination_dir=str(download_dir)
-    )
+    try:
+        dev_meetings_dir = download_meeting_subset(
+            subset_name=subset_name, version=version, destination_dir=str(download_dir)
+        )
+    except FileNotFoundError:
+        check_version_exists(version)  # will raise a better exception message
+        raise
+
     if dev_meetings_dir is None:
         logger.error(f"Failed to download {subset_name} for NOTSOFAR1 dataset")
 
