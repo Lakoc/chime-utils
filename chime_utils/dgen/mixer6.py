@@ -517,7 +517,7 @@ def gen_mixer6(
             parents=True, exist_ok=True
         )
 
-        if dest_split not in ["aaaaa"]:
+        if dest_split not in ["none"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
                 parents=True, exist_ok=True
             )
