@@ -147,7 +147,7 @@ def gen_dipco(
         Path(os.path.join(output_dir, "audio", dest_split)).mkdir(
             parents=True, exist_ok=True
         )
-        if dest_split not in ["eval"]:
+        if dest_split not in ["aaaa"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
                 parents=True, exist_ok=True
             )
@@ -214,7 +214,7 @@ def gen_dipco(
             for x in sess2audio[sess_name]:
                 filename = new_sess_name + "_" + "_".join(Path(x).stem.split("_")[1:])
                 if filename.split("_")[1].startswith("P"):
-                    if dest_split in ["dev", "eval"]:
+                    if dest_split in ["aaaaa"]:
                         continue
                     speaker_id = filename.split("_")[1]
                     filename = filename.split("_")[0] + "_{}".format(
@@ -238,7 +238,7 @@ def gen_dipco(
                     }
 
                 if not (
-                    dest_split in ["eval", "dev"]
+                    dest_split in ["aaaa"]
                     and Path(x).stem.split("_")[-1].startswith("P")
                 ):
                     symlink(
@@ -258,7 +258,7 @@ def gen_dipco(
             ) as f:
                 json.dump(devices_info, f, indent=4)
 
-            if dest_split not in ["eval"]:
+            if dest_split not in ["aaa"]:
                 with open(
                     os.path.join(
                         output_dir,

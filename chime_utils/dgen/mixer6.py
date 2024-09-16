@@ -390,6 +390,21 @@ def check_not_old_dev(ann_jsons):
         raise FileNotFoundError
 
 
+def adjust_eval_annotation(ann):
+    first = sorted(ann, key=lambda x: float(x["start_time"]))[0]
+
+    first = first["start_time"]
+    out = []
+    from copy import deepcopy
+
+    for x in ann:
+        tmp = deepcopy(x)
+        tmp["start_time"] = str(float(tmp["start_time"]) - float(first))
+        tmp["end_time"] = str(float(tmp["end_time"]) - float(first))
+        out.append(tmp)
+    return out
+
+
 def gen_mixer6(
     output_dir,
     corpus_dir,
@@ -441,7 +456,7 @@ def gen_mixer6(
         for c_audio in audios:
             audioname = Path(c_audio).stem
             channel_num = int(audioname.split("_")[-1].strip("CH"))
-            if channel_num <= 3 and split in ["eval", "dev"]:
+            if channel_num <= 3:  # and split in ["eval", "dev"]:
                 continue
             new_name = "{}_CH{:02d}".format(tgt_sess_name, channel_num)
             symlink(
@@ -502,7 +517,7 @@ def gen_mixer6(
             parents=True, exist_ok=True
         )
 
-        if dest_split not in ["eval"]:
+        if dest_split not in ["aaaaa"]:
             Path(os.path.join(output_dir, "transcriptions", dest_split)).mkdir(
                 parents=True, exist_ok=True
             )
@@ -560,6 +575,29 @@ def gen_mixer6(
             )
 
             if dest_split not in ["eval"]:
+                with open(
+                    os.path.join(
+                        output_dir,
+                        "transcriptions",
+                        dest_split,
+                        sess_map[sess_name] + ".json",
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(annotation, f, indent=4)
+                with open(
+                    os.path.join(
+                        output_dir,
+                        "transcriptions_scoring",
+                        dest_split,
+                        sess_map[sess_name] + ".json",
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(annotation_scoring, f, indent=4)
+            elif dest_split in ["eval"]:
+                annotation = adjust_eval_annotation(annotation)
+                annotation_scoring = adjust_eval_annotation(annotation_scoring)
                 with open(
                     os.path.join(
                         output_dir,

@@ -130,7 +130,7 @@ def gen_chime6(
         Path(os.path.join(output_dir, "audio", split)).mkdir(
             parents=True, exist_ok=True
         )
-        if split not in ["eval"]:
+        if split not in ["aaaa"]:
             Path(os.path.join(output_dir, "transcriptions", split)).mkdir(
                 parents=True, exist_ok=True
             )
@@ -170,7 +170,7 @@ def gen_chime6(
             for audio in c_sess_audio_f:
                 c_device = Path(audio).stem.lstrip(c_sess + "_")
                 if c_device.startswith("P"):
-                    if split in ["eval", "dev"]:
+                    if split in ["aaaaa"]:
                         continue
                     # close talk device
                     d_type = {
@@ -210,17 +210,14 @@ def gen_chime6(
 
             # create symlinks too
             for x in sess2audio[sess_name]:
-                if Path(x).stem.split("_")[-1].startswith("P") and split in [
-                    "eval",
-                    "dev",
-                ]:
+                if Path(x).stem.split("_")[-1].startswith("P") and split in ["aaaa"]:
                     continue
                 symlink(
                     x,
                     os.path.join(output_dir, "audio", split, Path(x).stem) + ".wav",
                 )
 
-            if split not in ["eval"]:
+            if split not in ["aaa"]:
                 with open(
                     os.path.join(
                         output_dir, "transcriptions", split, sess_name + ".json"
