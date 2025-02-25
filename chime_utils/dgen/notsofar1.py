@@ -64,10 +64,7 @@ def download_notsofar1(download_dir, subset_name):
         version = "240825.1_train"
     elif subset_name == "eval":
         subset_name = "eval_set"
-        version = "240629.1_eval_small"
-    elif subset_name == "eval_large":
-        subset_name = "eval_set"
-        version = "240825.1_eval_full_with_GT"
+        version = "240629.1_eval_small_with_GT"
     else:
         raise RuntimeError("Evaluation data has not yet been released !")
     try:
@@ -133,7 +130,7 @@ def convert2chime(
     output_devices_info = os.path.join(output_root, "devices", c_split)
     os.makedirs(output_devices_info, exist_ok=True)
 
-    if c_split in ["train", "train_sc", "dev"]:
+    if c_split in ["train", "train_sc", "dev", "eval"]:
         # dump transcriptions
         output_txt_f = os.path.join(output_root, "transcriptions", c_split)
         os.makedirs(output_txt_f, exist_ok=True)
@@ -174,7 +171,7 @@ def convert2chime(
         }
         devices_info[device_name] = d_type
 
-    if c_split not in ["train", "train_sc", "dev"]:
+    if c_split not in ["train", "train_sc", "dev", "eval"]:
         devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
         with open(os.path.join(output_devices_info, f"{session_name}.json"), "w") as f:
             json.dump(devices_info, f, indent=4)
@@ -185,8 +182,8 @@ def convert2chime(
         os.path.join(Path(audio_dir).parent, "close_talk", "*.wav")
     )
     for elem in close_talk_audio:
-        if c_split in ["eval", "dev"]:
-            break
+        # if c_split in ["eval", "dev"]:
+        #    break
         filename = Path(elem).stem
         tgt_name = os.path.join(
             output_audio_f,
