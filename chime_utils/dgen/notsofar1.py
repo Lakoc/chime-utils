@@ -130,7 +130,7 @@ def convert2chime(
     output_devices_info = os.path.join(output_root, "devices", c_split)
     os.makedirs(output_devices_info, exist_ok=True)
 
-    if c_split in ["train", "train_sc", "dev", "eval"]:
+    if c_split in ["train", "train_sc", "dev", "dev_sc", "eval", "eval_sc"]:
         # dump transcriptions
         output_txt_f = os.path.join(output_root, "transcriptions", c_split)
         os.makedirs(output_txt_f, exist_ok=True)
@@ -171,7 +171,7 @@ def convert2chime(
         }
         devices_info[device_name] = d_type
 
-    if c_split not in ["train", "train_sc", "dev", "eval"]:
+    if c_split not in ["train", "train_sc", "dev", "dev_sc", "eval", "eval_sc"]:
         devices_info = dict(sorted(devices_info.items(), key=lambda x: x[0]))
         with open(os.path.join(output_devices_info, f"{session_name}.json"), "w") as f:
             json.dump(devices_info, f, indent=4)
@@ -303,10 +303,8 @@ def gen_notsofar1(
     with open(uem_file, "w") as f:
         f.writelines(uem_data)
 
-    if dset_part not in ["train"]:
-        return
     # also prep sc data
-    uem_file_sc = os.path.join(output_dir, "uem", "train_sc", "all.uem")
+    uem_file_sc = os.path.join(output_dir, "uem", f"{dset_part}_sc", "all.uem")
     Path(uem_file_sc).parent.mkdir(parents=True, exist_ok=True)
     uem_data_sc = []
     for device_j in device_jsons:
@@ -336,7 +334,7 @@ def gen_notsofar1(
             sess_name = sess_map[f"{orig_sess_name}_{device_name}_sc"]
 
             convert2chime(
-                "train_sc",
+                f"{dset_part}_sc",
                 device_folder,
                 sess_name,
                 spk_map,
