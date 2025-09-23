@@ -313,8 +313,32 @@ def mixer6(corpus_dir, output_dir, part, challenge):
         "You can choose multiple by using commas e.g. 'train,dev,eval'."
     ),
 )
-def notsofar1(corpus_dir, output_dir, download, part):
+@click.option(
+    "--challenge",
+    "-c",
+    type=str,
+    default="chime8",
+    help=(
+        "Which CHiME Challenge edition do you need this data for ? "
+        "Choose between 'chime7' and 'chime8'.\n"
+        "This option controls the partitioning between dev "
+        "and eval and the text normalization used."
+    ),
+)
+@click.option(
+    "--txt-norm",
+    "-t",
+    type=str,
+    required=False,
+    default="chime8",
+    show_default=True,
+    help=(
+        "Which text normalization to use."
+        "Choose between 'None', 'chime6', 'chime7' and 'chime8'"
+    ),
+)
+def notsofar1(corpus_dir, output_dir, download, part, challenge, txt_norm):
     parts = part.split(",")
     for p in parts:
-        gen_notsofar1(output_dir, corpus_dir, download, p)
+        gen_notsofar1(output_dir, corpus_dir, download, p, challenge, txt_norm)
         logging.info(f"NOTSOFAR1 {p} set generated successfully.")

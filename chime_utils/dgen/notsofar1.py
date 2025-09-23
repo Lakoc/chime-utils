@@ -10,6 +10,7 @@ from typing import Optional, Union, Literal
 import soundfile as sf
 from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
+from chime_utils.dprep.lhotse import prepare_notsofar1
 from huggingface_hub import snapshot_download
 
 logging.basicConfig(
@@ -256,13 +257,13 @@ def convert2chime(
 
 
 def gen_notsofar1(
-        output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
+        output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8", txt_norm="chime8"
 ):
     corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
     spk_map = mapping["spk_map"]["notsofar1"]
     sess_map = mapping["sessions_map"]["notsofar1"]
-    text_normalization = get_txt_norm(challenge)
+    text_normalization = get_txt_norm(txt_norm)
     corpus_dir = os.path.join(corpus_dir, dset_part)
     if download:
         corpus_dir = download_notsofar1(corpus_dir, subset_name=dset_part)

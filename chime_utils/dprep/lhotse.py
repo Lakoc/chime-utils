@@ -16,6 +16,7 @@ import soundfile as sf
 from lhotse import fix_manifests, validate_recordings_and_supervisions
 from lhotse.audio import AudioSource, Recording, RecordingSet
 from lhotse.supervision import SupervisionSegment, SupervisionSet
+from lhotse.supervision import AlignmentItem
 from lhotse.utils import Pathlike
 
 from chime_utils.dprep.utils import read_uem
@@ -392,6 +393,18 @@ def prep_lhotse_shared(
                     f"{spk_id}_{corpus_name}_{sess_name}_{idx}-"
                     f"{round(100 * start):06d}_{round(100 * end):06d}-{mic}"
                 )
+                if "word_timing" in utt:
+                    alignment = {
+                        'word': []
+                    }
+
+                    for alig_text, alig_start_time, alig_end_time in utt['word_timing']:
+                        alig_start_time = float(alig_start_time)
+                        alig_end_time = float(alig_end_time)
+                        alignment['word'].append(AlignmentItem(symbol=alig_text, start=alig_start_time,
+                                                               duration=alig_end_time - alig_start_time))
+                else:
+                    alignment = {}
                 # spk-first as in kaldi convention
                 supervisions.append(
                     SupervisionSegment(
@@ -402,6 +415,7 @@ def prep_lhotse_shared(
                         channel=channels,
                         text=utt["words"],
                         speaker=utt["speaker"],
+                        alignment=alignment,
                     )
                 )
 
