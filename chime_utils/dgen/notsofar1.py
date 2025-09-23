@@ -5,12 +5,13 @@ import os
 import subprocess
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional, Union, Literal
 
 import soundfile as sf
-
-from chime_utils.dgen.azure_storage import download_meeting_subset
 from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
+from huggingface_hub import snapshot_download
+
 
 logging.basicConfig(
     format=(
@@ -25,6 +26,37 @@ NOTSOFAR1_FS = 16000
 
 
 _check_version_exists_cache = None
+
+
+def download_meeting_subset(
+    subset_name: Literal["train_set", "dev_set", "eval_set"],
+    version: str,
+    destination_dir: Union[str, Path],
+    overwrite: bool = False,
+) -> Optional[str]:
+    """
+    Download a subset of the meeting dataset to the destination directory.
+    The subsets and versions available will be updated in:
+        https://www.chimechallenge.org/current/task2/index
+
+    Args:
+        subset_name: name of split to download (dev_set / eval_set / train_set)
+        version: version to download (240103g / etc.). it's best to use the latest.
+        destination_dir: path to the directory where files will be downloaded.
+        overwrite: whether to override the output file if it already exists
+                   (warning!: if true, will delete the entire destination_dir if it exists)
+    Returns:
+        a string indicates the output directory path, or None if the download failed
+    """
+    local_dir = snapshot_download(
+        repo_id="microsoft/NOTSOFAR",
+        repo_type="dataset",
+        local_dir=destination_dir,
+        force_download=overwrite,
+        allow_patterns=f"benchmark-datasets/{subset_name}/{version}/*"
+    )
+
+    return local_dir
 
 
 def check_version_exists(version):
