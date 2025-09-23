@@ -12,7 +12,6 @@ from chime_utils.dgen.utils import get_mappings, symlink
 from chime_utils.text_norm import get_txt_norm
 from huggingface_hub import snapshot_download
 
-
 logging.basicConfig(
     format=(
         "%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]" " %(message)s"
@@ -24,15 +23,14 @@ logger = logging.getLogger(__name__)
 
 NOTSOFAR1_FS = 16000
 
-
 _check_version_exists_cache = None
 
 
 def download_meeting_subset(
-    subset_name: Literal["train_set", "dev_set", "eval_set"],
-    version: str,
-    destination_dir: Union[str, Path],
-    overwrite: bool = False,
+        subset_name: Literal["train_set", "dev_set", "eval_set"],
+        version: str,
+        destination_dir: Union[str, Path],
+        overwrite: bool = False,
 ) -> Optional[str]:
     """
     Download a subset of the meeting dataset to the destination directory.
@@ -48,7 +46,7 @@ def download_meeting_subset(
     Returns:
         a string indicates the output directory path, or None if the download failed
     """
-    local_dir = snapshot_download(
+    snapshot_download(
         repo_id="microsoft/NOTSOFAR",
         repo_type="dataset",
         local_dir=destination_dir,
@@ -56,7 +54,13 @@ def download_meeting_subset(
         allow_patterns=f"benchmark-datasets/{subset_name}/{version}/*"
     )
 
-    return local_dir
+    # Create a symlink to mimic folder structure expected by following data prep scripts
+    downloaded_path = Path(destination_dir) / "benchmark-datasets" / subset_name
+    symlink_path = Path(destination_dir) / subset_name
+    if not symlink_path.exists():
+        symlink_path.symlink_to(downloaded_path, target_is_directory=True)
+
+    return str(destination_dir)
 
 
 def check_version_exists(version):
@@ -114,7 +118,7 @@ def download_notsofar1(download_dir, subset_name):
 
 
 def normalize_notsofar1_annotation(
-    transcriptions, session_name, txt_normalization, spk_map
+        transcriptions, session_name, txt_normalization, spk_map
 ):
     # Sam: this is FUGLY but works
     output = []
@@ -148,13 +152,13 @@ def normalize_notsofar1_annotation(
 
 
 def convert2chime(
-    c_split,
-    audio_dir,
-    session_name,
-    spk_map,
-    txt_normalization,
-    output_root,
-    is_sc=False,
+        c_split,
+        audio_dir,
+        session_name,
+        spk_map,
+        txt_normalization,
+        output_root,
+        is_sc=False,
 ):
     output_audio_f = os.path.join(output_root, "audio", c_split)
     os.makedirs(output_audio_f, exist_ok=True)
@@ -173,7 +177,7 @@ def convert2chime(
         # load device info here we need it to get the speaker mapping
 
         with open(
-            os.path.join(Path(audio_dir).parent, "gt_meeting_metadata.json"), "r"
+                os.path.join(Path(audio_dir).parent, "gt_meeting_metadata.json"), "r"
         ) as f:
             metadata = json.load(f)
 
@@ -252,7 +256,7 @@ def convert2chime(
 
 
 def gen_notsofar1(
-    output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
+        output_dir, corpus_dir, download=False, dset_part="dev", challenge="chime8"
 ):
     corpus_dir = Path(corpus_dir).resolve()  # allow for relative path
     mapping = get_mappings(challenge)
